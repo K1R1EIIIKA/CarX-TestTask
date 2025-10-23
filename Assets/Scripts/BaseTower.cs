@@ -5,7 +5,7 @@ public abstract class BaseTower : MonoBehaviour
 {
     [SerializeField] private float _shootInterval = 0.5f;
     [SerializeField] private float _range = 4f;
-    [SerializeField] private GameObject _projectilePrefab;
+    [SerializeField] protected GameObject _projectilePrefab;
 
     private float _lastShotTime = Mathf.NegativeInfinity;
 

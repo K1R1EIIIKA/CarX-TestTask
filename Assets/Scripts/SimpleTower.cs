@@ -1,15 +1,19 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using MonstersLogic;
+using ProjectileLogic;
+using UnityEngine;
 
 public class SimpleTower : BaseTower
 {
-    protected override Transform GetNearestTarget()
+    protected override void Shoot(Transform targetTransform)
     {
-        throw new System.NotImplementedException();
-    }
+        Monster target = targetTransform.GetComponent<Monster>();
+        if (target == null) return;
 
-    protected override void Shoot(Transform target)
-    {
-        throw new System.NotImplementedException();
+        var projectileObject = Instantiate(_projectilePrefab, transform.position, Quaternion.identity);
+        var projectile = projectileObject.GetComponent<SimpleProjectile>();
+        if (projectile != null)
+        {
+            projectile.Launch(target);
+        }
     }
 }

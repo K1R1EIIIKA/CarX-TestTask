@@ -2,7 +2,7 @@
 
 namespace MonstersLogic
 {
-    public class Monster : MonoBehaviour
+    public class Monster : MonoBehaviour, IDamageable
     {
         [SerializeField] private float _speed = 0.1f;
         [SerializeField] private int _maxHp = 30;
@@ -13,6 +13,18 @@ namespace MonstersLogic
         private int _hp;
 
         public int Hp => _hp;
+
+        public Vector3 Velocity
+        {
+            get
+            {
+                if (_moveTarget == null)
+                    return Vector3.zero;
+
+                var direction = (_moveTarget.position - transform.position).normalized;
+                return direction * _speed / Time.deltaTime;
+            }
+        }
 
         private void Start()
         {
@@ -30,15 +42,24 @@ namespace MonstersLogic
                 return;
             }
 
-            var translation = _moveTarget.transform.position - transform.position;
-            if (translation.magnitude > _speed) translation = translation.normalized * _speed;
-
+            var direction = (_moveTarget.position - transform.position).normalized;
+            var translation = direction * _speed;
             transform.Translate(translation);
         }
 
         public void SetMoveTarget(Transform target)
         {
             _moveTarget = target;
+        }
+
+        public void TakeDamage(int damage)
+        {
+            _hp -= damage;
+
+            if (_hp <= 0)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }
