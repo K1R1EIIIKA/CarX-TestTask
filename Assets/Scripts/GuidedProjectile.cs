@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using MonstersLogic;
 
 public class GuidedProjectile : MonoBehaviour {
 	public GameObject m_target;
@@ -24,8 +25,8 @@ public class GuidedProjectile : MonoBehaviour {
 		if (monster == null)
 			return;
 
-		monster.m_hp -= m_damage;
-		if (monster.m_hp <= 0) {
+		monster.Hp -= m_damage;
+		if (monster.Hp <= 0) {
 			Destroy (monster.gameObject);
 		}
 		Destroy (gameObject);

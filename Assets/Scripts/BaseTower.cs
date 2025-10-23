@@ -1,4 +1,45 @@
-﻿public class BaseTower
-{
+﻿using MonstersLogic;
+using UnityEngine;
 
+public abstract class BaseTower : MonoBehaviour
+{
+    [SerializeField] private float _shootInterval = 0.5f;
+    [SerializeField] private float _range = 4f;
+    [SerializeField] private GameObject _projectilePrefab;
+
+    private float _lastShotTime = Mathf.NegativeInfinity;
+
+    protected virtual void Update()
+    {
+        if (Time.time - _lastShotTime < _shootInterval) return;
+
+        var target = GetNearestTarget();
+        if (target != null)
+        {
+            Shoot(target);
+            _lastShotTime = Time.time;
+        }
+    }
+
+    protected Transform GetNearestTarget()
+    {
+        Monster[] monsters = FindObjectsOfType<Monster>();
+        Transform nearest = null;
+        float nearestDist = float.MaxValue;
+        foreach (Monster monster in monsters)
+        {
+            if (monster == null)
+                continue;
+
+            float dist = Vector3.Distance(transform.position, monster.transform.position);
+            if (dist <= _range && dist < nearestDist)
+            {
+                nearest = monster.transform;
+                nearestDist = dist;
+            }
+        }
+        return nearest;
+    }
+
+    protected abstract void Shoot(Transform target);
 }
