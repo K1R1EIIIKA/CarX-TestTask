@@ -21,7 +21,7 @@ public abstract class BaseTower : MonoBehaviour
         }
     }
 
-    protected Transform GetNearestTarget()
+    private Transform GetNearestTarget()
     {
         Monster[] monsters = FindObjectsOfType<Monster>();
         Transform nearest = null;

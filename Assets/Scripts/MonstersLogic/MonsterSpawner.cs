@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MonstersLogic
 {
@@ -11,20 +10,31 @@ namespace MonstersLogic
 
         private float _lastSpawn = Mathf.NegativeInfinity;
 
-        private MonsterFactory _factory;
-
-        private void Awake()
-        {
-            _factory = new MonsterFactory(_monsterPrefab, _moveTarget);
-        }
+        private IMonsterFactory _factory;
 
         void Update()
         {
             if (Time.time > _lastSpawn + _interval)
             {
-                _factory.CreateMonster(transform.position, Quaternion.identity);
+                var monster = _factory.CreateMonster(transform.position, Quaternion.identity);
+                monster.SetMoveTarget(_moveTarget);
                 _lastSpawn = Time.time;
             }
+        }
+
+        public void EnableSpawner()
+        {
+            enabled = true;
+        }
+
+        public void DisableSpawner()
+        {
+            enabled = false;
+        }
+
+        public void Initialize(IMonsterFactory monsterFactory)
+        {
+            _factory = monsterFactory;
         }
     }
 }

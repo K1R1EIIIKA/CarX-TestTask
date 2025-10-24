@@ -1,13 +1,14 @@
-﻿using UnityEngine;
+﻿using Infrastructure.DIContainer;
+using UnityEngine;
 
 namespace MonstersLogic
 {
-    public class MonsterFactory
+    public class SimpleMonsterFactory : IMonsterFactory
     {
         private readonly Monster _monsterPrefab;
         private readonly Transform _moveGoal;
 
-        public MonsterFactory(Monster monsterPrefab, Transform moveGoal)
+        public SimpleMonsterFactory(Monster monsterPrefab, Transform moveGoal)
         {
             _monsterPrefab = monsterPrefab;
             _moveGoal = moveGoal;
@@ -20,5 +21,10 @@ namespace MonstersLogic
 
             return monster;
         }
+    }
+
+    public interface IMonsterFactory : IService
+    {
+        Monster CreateMonster(Vector3 position, Quaternion rotation);
     }
 }
