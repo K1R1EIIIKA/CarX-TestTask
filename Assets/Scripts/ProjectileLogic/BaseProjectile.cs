@@ -27,11 +27,10 @@ namespace ProjectileLogic
 
         private void OnTriggerEnter(Collider other)
         {
-            var monster = other.gameObject.GetComponent<Monster>();
-            if (monster == null)
+            if (!other.TryGetComponent(out IDamageable damageable))
                 return;
 
-            monster.TakeDamage(_damage);
+            damageable.TakeDamage(_damage);
             _returnToPoolAction?.Invoke();
         }
 

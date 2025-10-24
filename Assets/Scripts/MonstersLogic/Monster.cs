@@ -4,8 +4,8 @@ namespace MonstersLogic
 {
     public class Monster : MonoBehaviour, IDamageable
     {
-        [SerializeField] private float _speed = 0.1f;
-        [SerializeField] private int _maxHp = 30;
+        private float _speed = 0.1f;
+        private int _maxHp = 30;
 
         private Transform _moveTarget;
         private const float ReachDistance = 0.3f;
@@ -13,6 +13,13 @@ namespace MonstersLogic
         private int _hp;
 
         public int Hp => _hp;
+        
+        public void Initialize(float speed, int maxHp)
+        {
+            _speed = speed;
+            _maxHp = maxHp;
+            _hp = _maxHp;
+        }
 
         public Vector3 Velocity
         {

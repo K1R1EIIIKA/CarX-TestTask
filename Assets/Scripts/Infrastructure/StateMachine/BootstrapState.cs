@@ -31,7 +31,7 @@ namespace Infrastructure.StateMachine
             _allServices.RegisterSingle(new CannonProjectilePool(assetDatabase.CannonProjectileConfig.ProjectilePrefab, 10));
             _allServices.RegisterSingle(new MortarProjectilePool(assetDatabase.MortarProjectileConfig.ProjectilePrefab, 10));
 
-            _allServices.RegisterSingle<IMonsterFactory>(new SimpleMonsterFactory(assetDatabase.MonsterPrefab, _moveGoal));
+            _allServices.RegisterSingle<IMonsterFactory>(new SimpleMonsterFactory(assetDatabase.MonsterConfig, _moveGoal));
             _allServices.RegisterSingle<IProjectileFactory>(new ProjectileFactory(
                 _allServices.Single<SimpleProjectilePool>(),
                 _allServices.Single<CannonProjectilePool>(),

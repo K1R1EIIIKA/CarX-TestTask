@@ -1,13 +1,11 @@
 ﻿using Infrastructure.Configs;
-using MonstersLogic;
-using ProjectileLogic;
 using UnityEngine;
 
 namespace Infrastructure.Asset
 {
     public class AssetDatabase : IAssetDatabase
     {
-        public Monster MonsterPrefab => GetAsset<Monster>("Monster").GetComponent<Monster>();
+        public MonsterConfig MonsterConfig => GetAsset<MonsterConfig>("MonsterConfig");
         public SimpleProjectileConfig SimpleProjectileConfig => GetAsset<SimpleProjectileConfig>("Projectiles/SimpleProjectileConfig");
         public CannonProjectileConfig CannonProjectileConfig => GetAsset<CannonProjectileConfig>("Projectiles/CannonProjectileConfig");
         public MortarProjectileConfig MortarProjectileConfig => GetAsset<MortarProjectileConfig>("Projectiles/MortarProjectileConfig");

@@ -8,7 +8,7 @@ namespace Infrastructure.Asset
 {
     public interface IAssetDatabase : IService
     {
-        Monster MonsterPrefab { get; }
+        MonsterConfig MonsterConfig { get; }
         SimpleProjectileConfig SimpleProjectileConfig { get; }
         CannonProjectileConfig CannonProjectileConfig { get; }
         MortarProjectileConfig MortarProjectileConfig { get; }
