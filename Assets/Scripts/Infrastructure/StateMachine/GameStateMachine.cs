@@ -16,10 +16,10 @@ namespace Infrastructure.StateMachine
         public void Initialize(AllServices container, Transform moveGoal, MonsterSpawner[] spawners)
         {
             _states = new Dictionary<Type, IGameState>()
-            {
-                { typeof(BootstrapState), new BootstrapState(this, container, moveGoal) },
-                { typeof(GameLoopState), new GameLoopState(spawners, container.Single<IMonsterFactory>()) }
-            };
+                {
+                    { typeof(BootstrapState), new BootstrapState(this, container, moveGoal) },
+                    { typeof(GameLoopState), new GameLoopState(spawners, container.Single<IProjectileFactory>(), container.Single<IMonsterFactory>()) },
+                };
         }
 
         public void Enter<T>() where T : IGameState

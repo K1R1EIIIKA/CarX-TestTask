@@ -14,6 +14,8 @@ namespace ProjectileLogic
 
         public override void Launch(Monster target)
         {
+            base.Launch(target);
+            
             var towerPos = transform.position;
             var targetPos = target.transform.position;
             var targetVel = target.Velocity;

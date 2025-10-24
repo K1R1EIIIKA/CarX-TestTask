@@ -1,13 +1,21 @@
-﻿using MonstersLogic;
+﻿using Infrastructure.Factory;
+using MonstersLogic;
+using ProjectileLogic;
 using UnityEngine;
 
 public abstract class BaseTower : MonoBehaviour
 {
     [SerializeField] private float _shootInterval = 0.5f;
     [SerializeField] private float _range = 4f;
-    [SerializeField] protected GameObject _projectilePrefab;
 
     private float _lastShotTime = Mathf.NegativeInfinity;
+
+    protected IProjectileFactory projectileFactory;
+
+    public void Initialize(IProjectileFactory factory)
+    {
+        projectileFactory = factory;
+    }
 
     protected virtual void Update()
     {

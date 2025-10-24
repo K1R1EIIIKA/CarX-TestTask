@@ -8,10 +8,10 @@ namespace Infrastructure.ObjectPooling
     public class CannonProjectilePool : IService
     {
         private readonly ObjectPool<CannonProjectile> _pool;
-        public CannonProjectilePool(CannonProjectile projectilePrefab, int initialSize)
+        public CannonProjectilePool(GameObject projectilePrefab, int initialSize)
         {
             _pool = new ObjectPool<CannonProjectile>(
-                createFunc: () => Object.Instantiate(projectilePrefab),
+                createFunc: () => Object.Instantiate(projectilePrefab).GetComponent<CannonProjectile>(),
                 actionOnGet: (projectile) => projectile.gameObject.SetActive(true),
                 actionOnRelease: (projectile) => projectile.gameObject.SetActive(false),
                 actionOnDestroy: (projectile) => Object.Destroy(projectile.gameObject),

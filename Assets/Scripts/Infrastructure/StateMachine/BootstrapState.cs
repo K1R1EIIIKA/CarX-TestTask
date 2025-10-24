@@ -1,9 +1,7 @@
-﻿using System;
-using Infrastructure.Asset;
+﻿using Infrastructure.Asset;
 using Infrastructure.DIContainer;
 using Infrastructure.Factory;
 using Infrastructure.ObjectPooling;
-using MonstersLogic;
 using UnityEngine;
 
 namespace Infrastructure.StateMachine
@@ -29,15 +27,16 @@ namespace Infrastructure.StateMachine
             _allServices.RegisterSingle<IAssetDatabase>(new AssetDatabase());
             var assetDatabase = _allServices.Single<IAssetDatabase>();
 
-            _allServices.RegisterSingle(new SimpleProjectilePool(assetDatabase.SimpleProjectilePrefab, 10));
-            _allServices.RegisterSingle(new CannonProjectilePool(assetDatabase.CannonProjectilePrefab, 10));
-            _allServices.RegisterSingle(new MortarProjectilePool(assetDatabase.MortarProjectilePrefab, 10));
+            _allServices.RegisterSingle(new SimpleProjectilePool(assetDatabase.SimpleProjectileConfig.ProjectilePrefab, 10));
+            _allServices.RegisterSingle(new CannonProjectilePool(assetDatabase.CannonProjectileConfig.ProjectilePrefab, 10));
+            _allServices.RegisterSingle(new MortarProjectilePool(assetDatabase.MortarProjectileConfig.ProjectilePrefab, 10));
 
             _allServices.RegisterSingle<IMonsterFactory>(new SimpleMonsterFactory(assetDatabase.MonsterPrefab, _moveGoal));
             _allServices.RegisterSingle<IProjectileFactory>(new ProjectileFactory(
                 _allServices.Single<SimpleProjectilePool>(),
                 _allServices.Single<CannonProjectilePool>(),
-                _allServices.Single<MortarProjectilePool>()));
+                _allServices.Single<MortarProjectilePool>(),
+                _allServices.Single<IAssetDatabase>()));
         }
 
         public void Enter()

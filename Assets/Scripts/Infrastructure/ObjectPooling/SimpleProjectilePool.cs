@@ -1,5 +1,7 @@
-﻿using Infrastructure.DIContainer;
+﻿using System;
+using Infrastructure.DIContainer;
 using ProjectileLogic;
+using UnityEngine;
 using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
@@ -8,11 +10,17 @@ namespace Infrastructure.ObjectPooling
     public class SimpleProjectilePool : IService
     {
         private readonly ObjectPool<SimpleProjectile> _projectilePool;
+        
+        private Action _returnToPool;
 
-        public SimpleProjectilePool(SimpleProjectile projectilePrefab, int initialSize)
+        public SimpleProjectilePool(GameObject projectilePrefab, int initialSize)
         {
             _projectilePool = new ObjectPool<SimpleProjectile>(
-                () => Object.Instantiate(projectilePrefab),
+                () =>
+                {
+                    var projectile = Object.Instantiate(projectilePrefab).GetComponent<SimpleProjectile>();
+                    return projectile;
+                },
                 projectile => projectile.gameObject.SetActive(true),
                 projectile => projectile.gameObject.SetActive(false),
                 projectile => Object.Destroy(projectile.gameObject),
@@ -21,9 +29,12 @@ namespace Infrastructure.ObjectPooling
                 initialSize * 2);
         }
 
-        public SimpleProjectile GetProjectile()
+        public SimpleProjectile Get(out Action returnToPool)
         {
-            return _projectilePool.Get();
+            var projectile = _projectilePool.Get();
+            returnToPool = () => _projectilePool.Release(projectile);
+            
+            return projectile;
         }
 
         public void ReleaseProjectile(SimpleProjectile projectile)

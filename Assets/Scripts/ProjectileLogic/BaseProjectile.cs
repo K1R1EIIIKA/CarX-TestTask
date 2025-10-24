@@ -1,4 +1,6 @@
-﻿using MonstersLogic;
+﻿using System;
+using System.Collections;
+using MonstersLogic;
 using UnityEngine;
 
 namespace ProjectileLogic
@@ -7,11 +9,15 @@ namespace ProjectileLogic
     {
         protected float _speed = 0.2f;
         private int _damage = 10;
+        private float _lifetime = 5f;
+        private Action _returnToPoolAction;
 
-        public void Initialize(float speed, int damage)
+        public void Initialize(float speed, int damage, float lifetime, Action returnToPoolAction)
         {
             _speed = speed;
             _damage = damage;
+            _lifetime = lifetime;
+            _returnToPoolAction = returnToPoolAction;
         }
 
         private void Update()
@@ -26,11 +32,20 @@ namespace ProjectileLogic
                 return;
 
             monster.TakeDamage(_damage);
-            Destroy(gameObject);
+            _returnToPoolAction?.Invoke();
         }
 
         protected abstract void Move();
 
-        public abstract void Launch(Monster target);
+        public virtual void Launch(Monster target)
+        {
+            StartCoroutine(LifetimeCoroutine());
+        }
+
+        private IEnumerator LifetimeCoroutine()
+        {
+            yield return new WaitForSeconds(_lifetime);
+            _returnToPoolAction?.Invoke();
+        }
     }
 }

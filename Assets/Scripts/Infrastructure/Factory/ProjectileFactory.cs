@@ -1,4 +1,6 @@
-﻿using Infrastructure.ObjectPooling;
+﻿using Infrastructure.Asset;
+using Infrastructure.ObjectPooling;
+using ProjectileLogic;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -8,29 +10,45 @@ namespace Infrastructure.Factory
         private readonly SimpleProjectilePool _simpleProjectilePool;
         private readonly CannonProjectilePool _cannonProjectilePool;
         private readonly MortarProjectilePool _mortarProjectilePool;
+        
+        private readonly IAssetDatabase _assetDatabase;
 
         public ProjectileFactory(SimpleProjectilePool simpleProjectilePool,
             CannonProjectilePool cannonProjectilePool,
-            MortarProjectilePool mortarProjectilePool)
+            MortarProjectilePool mortarProjectilePool,
+            IAssetDatabase assetDatabase)
         {
             _simpleProjectilePool = simpleProjectilePool;
             _cannonProjectilePool = cannonProjectilePool;
             _mortarProjectilePool = mortarProjectilePool;
+            _assetDatabase = assetDatabase;
         }
 
-        public GameObject CreateSimpleProjectile(Vector3 position, Quaternion rotation)
+        public SimpleProjectile CreateSimpleProjectile(Vector3 position, Quaternion rotation)
         {
-            throw new System.NotImplementedException();
+            var projectile = _simpleProjectilePool.Get(out var returnToPoolAction);
+            
+            var config = _assetDatabase.SimpleProjectileConfig;
+            projectile.Initialize(config.Speed, config.Damage, config.Lifetime, returnToPoolAction);
+            projectile.transform.SetPositionAndRotation(position, rotation);
+            
+            return projectile;
         }
 
-        public GameObject CreateCannonProjectile(Vector3 position, Quaternion rotation)
+        public CannonProjectile CreateCannonProjectile(Vector3 position, Quaternion rotation)
         {
-            throw new System.NotImplementedException();
+            var projectile = _cannonProjectilePool.Get();
+            projectile.transform.SetPositionAndRotation(position, rotation);
+            
+            return projectile;
         }
 
-        public GameObject CreateMortarProjectile(Vector3 position, Quaternion rotation)
+        public MortarProjectile CreateMortarProjectile(Vector3 position, Quaternion rotation)
         {
-            throw new System.NotImplementedException();
+            var projectile = _mortarProjectilePool.Get();
+            projectile.transform.SetPositionAndRotation(position, rotation);
+            
+            return projectile;
         }
     }
 }

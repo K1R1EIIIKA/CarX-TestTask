@@ -9,10 +9,10 @@ namespace Infrastructure.ObjectPooling
     {
         private readonly ObjectPool<MortarProjectile> _pool;
 
-        public MortarProjectilePool(MortarProjectile projectilePrefab, int initialSize)
+        public MortarProjectilePool(GameObject projectilePrefab, int initialSize)
         {
             _pool = new ObjectPool<MortarProjectile>(
-                createFunc: () => Object.Instantiate(projectilePrefab),
+                createFunc: () => Object.Instantiate(projectilePrefab).GetComponent<MortarProjectile>(),
                 actionOnGet: projectile => projectile.gameObject.SetActive(true),
                 actionOnRelease: projectile => projectile.gameObject.SetActive(false),
                 actionOnDestroy: projectile => Object.Destroy(projectile.gameObject),

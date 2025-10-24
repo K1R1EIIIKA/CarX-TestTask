@@ -1,12 +1,13 @@
 ﻿using Infrastructure.DIContainer;
+using ProjectileLogic;
 using UnityEngine;
 
 namespace Infrastructure.Factory
 {
     public interface IProjectileFactory : IService
     {
-        GameObject CreateSimpleProjectile(Vector3 position, Quaternion rotation);
-        GameObject CreateCannonProjectile(Vector3 position, Quaternion rotation);
-        GameObject CreateMortarProjectile(Vector3 position, Quaternion rotation);
+        SimpleProjectile CreateSimpleProjectile(Vector3 position, Quaternion rotation);
+        CannonProjectile CreateCannonProjectile(Vector3 position, Quaternion rotation);
+        MortarProjectile CreateMortarProjectile(Vector3 position, Quaternion rotation);
     }
 }
