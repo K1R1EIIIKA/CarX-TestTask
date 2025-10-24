@@ -1,5 +1,8 @@
 ﻿using System;
+using Infrastructure.Asset;
 using Infrastructure.DIContainer;
+using Infrastructure.Factory;
+using Infrastructure.ObjectPooling;
 using MonstersLogic;
 using UnityEngine;
 
@@ -9,14 +12,12 @@ namespace Infrastructure.StateMachine
     {
         private readonly AllServices _allServices;
         private readonly IStateSwitcher _stateSwitcher;
-        private readonly Monster _monsterPrefab;
         private readonly Transform _moveGoal;
 
-        public BootstrapState(IStateSwitcher stateSwitcher, AllServices allServices, Monster monsterPrefab, Transform moveGoal)
+        public BootstrapState(IStateSwitcher stateSwitcher, AllServices allServices, Transform moveGoal)
         {
             _allServices = allServices;
             _stateSwitcher = stateSwitcher;
-            _monsterPrefab = monsterPrefab;
             _moveGoal = moveGoal;
 
             RegisterServices();
@@ -25,7 +26,18 @@ namespace Infrastructure.StateMachine
 
         private void RegisterServices()
         {
-            _allServices.RegisterSingle<IMonsterFactory>(new SimpleMonsterFactory(_monsterPrefab, _moveGoal));
+            _allServices.RegisterSingle<IAssetDatabase>(new AssetDatabase());
+            var assetDatabase = _allServices.Single<IAssetDatabase>();
+
+            _allServices.RegisterSingle(new SimpleProjectilePool(assetDatabase.SimpleProjectilePrefab, 10));
+            _allServices.RegisterSingle(new CannonProjectilePool(assetDatabase.CannonProjectilePrefab, 10));
+            _allServices.RegisterSingle(new MortarProjectilePool(assetDatabase.MortarProjectilePrefab, 10));
+
+            _allServices.RegisterSingle<IMonsterFactory>(new SimpleMonsterFactory(assetDatabase.MonsterPrefab, _moveGoal));
+            _allServices.RegisterSingle<IProjectileFactory>(new ProjectileFactory(
+                _allServices.Single<SimpleProjectilePool>(),
+                _allServices.Single<CannonProjectilePool>(),
+                _allServices.Single<MortarProjectilePool>()));
         }
 
         public void Enter()

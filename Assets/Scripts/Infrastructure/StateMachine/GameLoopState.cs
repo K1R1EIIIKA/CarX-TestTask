@@ -1,4 +1,5 @@
 ﻿using System;
+using Infrastructure.Factory;
 using MonstersLogic;
 
 namespace Infrastructure.StateMachine

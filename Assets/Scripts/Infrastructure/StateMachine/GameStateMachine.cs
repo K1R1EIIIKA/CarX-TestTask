@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Infrastructure.Asset;
 using Infrastructure.DIContainer;
+using Infrastructure.Factory;
 using MonstersLogic;
 using UnityEngine;
 
@@ -11,13 +13,12 @@ namespace Infrastructure.StateMachine
         private IGameState _currentState;
         private Dictionary<Type, IGameState> _states;
 
-        public void Initialize(AllServices container, Monster monsterPrefab, Transform moveGoal, MonsterSpawner[] spawners)
+        public void Initialize(AllServices container, Transform moveGoal, MonsterSpawner[] spawners)
         {
             _states = new Dictionary<Type, IGameState>()
             {
-                { typeof(BootstrapState), new BootstrapState(this, container, monsterPrefab, moveGoal) },
-                { typeof(GameLoopState), new GameLoopState(spawners, container.Single<IMonsterFactory>()) },
-                { typeof(EndGameState), new EndGameState() }
+                { typeof(BootstrapState), new BootstrapState(this, container, moveGoal) },
+                { typeof(GameLoopState), new GameLoopState(spawners, container.Single<IMonsterFactory>()) }
             };
         }
 

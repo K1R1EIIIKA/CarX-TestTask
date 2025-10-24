@@ -1,6 +1,9 @@
-﻿public interface IGameState
+﻿namespace Infrastructure.StateMachine
 {
-    void Enter();
-    void Exit();
-    void Tick();
+    public interface IGameState
+    {
+        void Enter();
+        void Exit();
+        void Tick();
+    }
 }

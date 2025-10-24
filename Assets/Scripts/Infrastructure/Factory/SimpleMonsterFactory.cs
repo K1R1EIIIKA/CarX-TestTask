@@ -1,7 +1,7 @@
-﻿using Infrastructure.DIContainer;
+﻿using MonstersLogic;
 using UnityEngine;
 
-namespace MonstersLogic
+namespace Infrastructure.Factory
 {
     public class SimpleMonsterFactory : IMonsterFactory
     {
@@ -21,10 +21,5 @@ namespace MonstersLogic
 
             return monster;
         }
-    }
-
-    public interface IMonsterFactory : IService
-    {
-        Monster CreateMonster(Vector3 position, Quaternion rotation);
     }
 }

@@ -5,8 +5,14 @@ namespace ProjectileLogic
 {
     public abstract class BaseProjectile : MonoBehaviour
     {
-        [SerializeField] protected float _speed = 0.2f;
-        [SerializeField] private int _damage = 10;
+        protected float _speed = 0.2f;
+        private int _damage = 10;
+
+        public void Initialize(float speed, int damage)
+        {
+            _speed = speed;
+            _damage = damage;
+        }
 
         private void Update()
         {
