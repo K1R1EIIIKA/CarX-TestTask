@@ -2,7 +2,6 @@
 
 namespace Infrastructure.Configs
 {
-
     [CreateAssetMenu(fileName = "SimpleProjectileConfig", menuName = "Configs/SimpleProjectileConfig", order = 0)]
     public class SimpleProjectileConfig : ProjectileConfig
     {

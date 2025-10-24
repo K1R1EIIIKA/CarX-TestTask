@@ -31,7 +31,7 @@ namespace ProjectileLogic
                 return;
 
             damageable.TakeDamage(_damage);
-            _returnToPoolAction?.Invoke();
+            ReleaseToPool();
         }
 
         protected abstract void Move();
@@ -44,6 +44,11 @@ namespace ProjectileLogic
         private IEnumerator LifetimeCoroutine()
         {
             yield return new WaitForSeconds(_lifetime);
+            ReleaseToPool();
+        }
+        
+        protected void ReleaseToPool()
+        {
             _returnToPoolAction?.Invoke();
         }
     }

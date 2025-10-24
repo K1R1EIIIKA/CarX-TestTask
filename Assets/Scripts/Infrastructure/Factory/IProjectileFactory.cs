@@ -1,4 +1,5 @@
-﻿using Infrastructure.DIContainer;
+﻿using CanonLogic;
+using Infrastructure.DIContainer;
 using ProjectileLogic;
 using UnityEngine;
 
@@ -9,5 +10,6 @@ namespace Infrastructure.Factory
         SimpleProjectile CreateSimpleProjectile(Vector3 position, Quaternion rotation);
         CannonProjectile CreateCannonProjectile(Vector3 position, Quaternion rotation);
         MortarProjectile CreateMortarProjectile(Vector3 position, Quaternion rotation);
+        BaseProjectile CreateProjectile(ProjectileType projectileType, Vector3 shootPointPosition, Quaternion transformRotation);
     }
 }

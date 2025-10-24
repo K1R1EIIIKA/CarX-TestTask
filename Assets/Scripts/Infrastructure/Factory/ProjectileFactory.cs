@@ -1,4 +1,5 @@
-﻿using Infrastructure.Asset;
+﻿using CanonLogic;
+using Infrastructure.Asset;
 using Infrastructure.ObjectPooling;
 using ProjectileLogic;
 using UnityEngine;
@@ -37,7 +38,10 @@ namespace Infrastructure.Factory
 
         public CannonProjectile CreateCannonProjectile(Vector3 position, Quaternion rotation)
         {
-            var projectile = _cannonProjectilePool.Get();
+            var projectile = _cannonProjectilePool.Get(out var returnToPoolAction);
+            
+            var config = _assetDatabase.CannonProjectileConfig;
+            projectile.Initialize(config.Speed, config.Damage, config.Lifetime, returnToPoolAction);
             projectile.transform.SetPositionAndRotation(position, rotation);
             
             return projectile;
@@ -45,10 +49,23 @@ namespace Infrastructure.Factory
 
         public MortarProjectile CreateMortarProjectile(Vector3 position, Quaternion rotation)
         {
-            var projectile = _mortarProjectilePool.Get();
+            var projectile = _mortarProjectilePool.Get(out var returnToPoolAction);
+            
+            var config = _assetDatabase.MortarProjectileConfig;
+            projectile.Initialize(config.Speed, config.Damage, config.Lifetime, returnToPoolAction);
             projectile.transform.SetPositionAndRotation(position, rotation);
             
             return projectile;
+        }
+        public BaseProjectile CreateProjectile(ProjectileType projectileType, Vector3 shootPointPosition, Quaternion transformRotation)
+        {
+            return projectileType switch
+            {
+                ProjectileType.Simple => CreateSimpleProjectile(shootPointPosition, transformRotation),
+                ProjectileType.Cannon => CreateCannonProjectile(shootPointPosition, transformRotation),
+                ProjectileType.Mortar => CreateMortarProjectile(shootPointPosition, transformRotation),
+                _ => null,
+            };
         }
     }
 }

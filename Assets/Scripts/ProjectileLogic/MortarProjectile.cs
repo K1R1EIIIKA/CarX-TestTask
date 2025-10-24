@@ -3,7 +3,11 @@ using UnityEngine;
 
 namespace ProjectileLogic
 {
-	public class MortarProjectile : MonoBehaviour {
+	public class MortarProjectile : BaseProjectile {
 
+		protected override void Move()
+		{
+			throw new System.NotImplementedException();
+		}
 	}
 }

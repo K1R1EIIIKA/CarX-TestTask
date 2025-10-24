@@ -1,16 +1,18 @@
+using System;
 using Infrastructure.DIContainer;
 using ProjectileLogic;
 using UnityEngine;
 using UnityEngine.Pool;
+using Object = UnityEngine.Object;
 
 namespace Infrastructure.ObjectPooling
 {
     public class CannonProjectilePool : IService
     {
-        private readonly ObjectPool<CannonProjectile> _pool;
+        private readonly ObjectPool<CannonProjectile> _projectilePool;
         public CannonProjectilePool(GameObject projectilePrefab, int initialSize)
         {
-            _pool = new ObjectPool<CannonProjectile>(
+            _projectilePool = new ObjectPool<CannonProjectile>(
                 createFunc: () => Object.Instantiate(projectilePrefab).GetComponent<CannonProjectile>(),
                 actionOnGet: (projectile) => projectile.gameObject.SetActive(true),
                 actionOnRelease: (projectile) => projectile.gameObject.SetActive(false),
@@ -21,19 +23,22 @@ namespace Infrastructure.ObjectPooling
             );
         }
 
-        public CannonProjectile Get()
+        public CannonProjectile Get(out Action returnToPool)
         {
-            return _pool.Get();
+            var projectile = _projectilePool.Get();
+            returnToPool = () => _projectilePool.Release(projectile);
+            
+            return projectile;
         }
 
         public void Release(CannonProjectile projectile)
         {
-            _pool.Release(projectile);
+            _projectilePool.Release(projectile);
         }
 
         public void Dispose()
         {
-            _pool.Clear();
+            _projectilePool.Clear();
         }
     }
 }

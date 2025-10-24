@@ -1,4 +1,5 @@
 ﻿using System;
+using CanonLogic;
 using Infrastructure.Factory;
 using MonstersLogic;
 
@@ -18,7 +19,7 @@ namespace Infrastructure.StateMachine
         }
         public void Enter()
         {
-            foreach (var tower in UnityEngine.Object.FindObjectsByType<SimpleTower>(UnityEngine.FindObjectsSortMode.None))
+            foreach (var tower in UnityEngine.Object.FindObjectsByType<BaseTower>(UnityEngine.FindObjectsSortMode.None))
             {
                 tower.Initialize(_projectileFactory);
             }

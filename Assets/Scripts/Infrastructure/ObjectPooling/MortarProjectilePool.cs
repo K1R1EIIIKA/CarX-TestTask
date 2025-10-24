@@ -1,17 +1,19 @@
-﻿using Infrastructure.DIContainer;
+﻿using System;
+using Infrastructure.DIContainer;
 using ProjectileLogic;
 using UnityEngine;
 using UnityEngine.Pool;
+using Object = UnityEngine.Object;
 
 namespace Infrastructure.ObjectPooling
 {
     public class MortarProjectilePool : IService
     {
-        private readonly ObjectPool<MortarProjectile> _pool;
+        private readonly ObjectPool<MortarProjectile> _projectilePool;
 
         public MortarProjectilePool(GameObject projectilePrefab, int initialSize)
         {
-            _pool = new ObjectPool<MortarProjectile>(
+            _projectilePool = new ObjectPool<MortarProjectile>(
                 createFunc: () => Object.Instantiate(projectilePrefab).GetComponent<MortarProjectile>(),
                 actionOnGet: projectile => projectile.gameObject.SetActive(true),
                 actionOnRelease: projectile => projectile.gameObject.SetActive(false),
@@ -22,19 +24,22 @@ namespace Infrastructure.ObjectPooling
             );
         }
 
-        public MortarProjectile Get()
+        public MortarProjectile Get(out Action returnToPool)
         {
-            return _pool.Get();
+            var projectile = _projectilePool.Get();
+            returnToPool = () => _projectilePool.Release(projectile);
+            
+            return projectile;
         }
 
         public void Release(MortarProjectile projectile)
         {
-            _pool.Release(projectile);
+            _projectilePool.Release(projectile);
         }
 
         public void Dispose()
         {
-            _pool.Clear();
+            _projectilePool.Clear();
         }
     }
 }
