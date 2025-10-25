@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Infrastructure.Configs;
 using MonstersLogic;
 using UnityEngine;
 
@@ -12,11 +13,11 @@ namespace ProjectileLogic
         private float _lifetime = 5f;
         private Action _returnToPoolAction;
 
-        public void Initialize(float speed, int damage, float lifetime, Action returnToPoolAction)
+        public virtual void Initialize(ProjectileConfig config, Action returnToPoolAction)
         {
-            _speed = speed;
-            _damage = damage;
-            _lifetime = lifetime;
+            _speed = config.Speed;
+            _damage = config.Damage;
+            _lifetime = config.Lifetime;
             _returnToPoolAction = returnToPoolAction;
         }
 

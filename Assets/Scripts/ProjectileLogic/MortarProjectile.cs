@@ -1,4 +1,6 @@
-﻿using MonstersLogic;
+﻿using System;
+using Infrastructure.Configs;
+using MonstersLogic;
 using UnityEngine;
 
 namespace ProjectileLogic
@@ -6,14 +8,27 @@ namespace ProjectileLogic
     public class MortarProjectile : BaseProjectile
     {
         private Vector3 _velocity;
-        [SerializeField] private float _gravity = -20f;  // Сила гравитации (настраивай в префабе)
-        [SerializeField] private float _launchAngle = 45f; // Угол стрельбы вверх (по умолчанию)
+        private float _gravity;
+        private float _speed;
+
+        public override void Initialize(ProjectileConfig config, Action returnToPoolAction)
+        {
+            base.Initialize(config, returnToPoolAction);
+
+            var mortarConfig = config as MortarProjectileConfig;
+            _gravity = -Mathf.Abs(mortarConfig.Gravity);
+            _speed = mortarConfig.Speed;
+        }
 
         protected override void Move()
         {
-            // ✅ Гравитация действует только по Y!
             _velocity.y += _gravity * Time.deltaTime;
             transform.position += _velocity * Time.deltaTime;
+
+            if (_velocity.sqrMagnitude > 0.01f)
+            {
+                transform.rotation = Quaternion.LookRotation(_velocity);
+            }
         }
 
         public override void Launch(Monster target)
@@ -24,105 +39,119 @@ namespace ProjectileLogic
             Vector3 targetPos = target.transform.position;
             Vector3 targetVel = target.Velocity;
 
-            // ✅ Рассчитываем оптимальную траекторию с упреждением
-            if (CalculateParabolicLaunch(shootPos, targetPos, targetVel, out Vector3 launchVelocity))
+            // Попытка найти точное время полёта
+            if (!TryPredictImpact(
+                shootPos,
+                targetPos,
+                targetVel,
+                out float impactTime,
+                out Vector3 predictedPos))
             {
-                _velocity = launchVelocity;
-            }
-            else
-            {
-                // Fallback: простая дуга
-                _velocity = SimpleArcLaunch(shootPos, targetPos);
+                // Не можем попасть — возвращаем снаряд в пул
+                ReleaseToPool();
+                return;
             }
 
-            // ✅ Поворачиваем снаряд в направлении начальной скорости
-            transform.rotation = Quaternion.LookRotation(_velocity);
+            // Успешно — запускаем
+            LaunchWithVelocity(shootPos, predictedPos, impactTime);
         }
 
-        // ✅ ОСНОВНОЙ РАСЧЁТ: Параболическое упреждение
-        private bool CalculateParabolicLaunch(Vector3 shootPos, Vector3 targetPos, Vector3 targetVel, out Vector3 velocity)
+        private bool TryPredictImpact(
+            Vector3 shootPos,
+            Vector3 targetPos,
+            Vector3 targetVel,
+            out float impactTime,
+            out Vector3 predictedPos)
         {
-            Vector3 deltaPos = targetPos - shootPos;
-            float horizontalDist = new Vector3(deltaPos.x, 0, deltaPos.z).magnitude;
+            impactTime = 0f;
+            predictedPos = Vector3.zero;
 
-            if (horizontalDist < 0.1f)
+            const int maxIterations = 30;
+            const float timeTolerance = 0.02f;
+            const float speedTolerance = 0.1f;
+
+            float tLow = 0.1f;
+            float tHigh = 20f; // Максимальное время
+
+            float bestT = -1f;
+            float bestError = float.MaxValue;
+
+            // Бинарный поиск по времени
+            for (int i = 0; i < maxIterations; i++)
             {
-                velocity = Vector3.zero;
-                return false;
-            }
+                float tMid = (tLow + tHigh) * 0.5f;
+                Vector3 futurePos = targetPos + targetVel * tMid;
+                Vector3 toFuture = futurePos - shootPos;
 
-            // Итеративный поиск оптимального времени полёта
-            float minTime = 0.1f;
-            float maxTime = 5f;
-            float bestTime = -1f;
-            float minError = float.MaxValue;
+                float distXZ = new Vector2(toFuture.x, toFuture.z).magnitude;
+                float dy = toFuture.y;
 
-            for (int i = 0; i < 50; i++) // 50 итераций достаточно
-            {
-                float t = minTime + (maxTime - minTime) * i / 49f;
-                
-                // Предсказанная позиция цели
-                Vector3 predictedTarget = targetPos + targetVel * t;
-                float predictedHorizontalDist = new Vector3(predictedTarget.x - shootPos.x, 0, predictedTarget.z - shootPos.z).magnitude;
-                
-                // Горизонтальная скорость = дистанция / время
-                float Vx = predictedHorizontalDist / t;
-                
-                // Вертикальная скорость для достижения высоты
-                float deltaY = predictedTarget.y - shootPos.y;
-                float Vy = (deltaY - 0.5f * _gravity * t * t) / t;
-                
-                if (Vy < 0) continue; // Снаряд не должен падать сразу
+                if (!CalculateRequiredSpeed(distXZ, dy, tMid, out float requiredSpeed))
+                    continue;
 
-                // Проверяем, достигает ли снаряд цели
-                float finalY = shootPos.y + Vy * t + 0.5f * _gravity * t * t;
-                float error = Mathf.Abs(finalY - predictedTarget.y);
-                
-                if (error < minError)
+                float error = Mathf.Abs(requiredSpeed - _speed);
+
+                if (error < bestError)
                 {
-                    minError = error;
-                    bestTime = t;
+                    bestError = error;
+                    bestT = tMid;
+                    predictedPos = futurePos;
                 }
+
+                // Сходимся к нужной скорости
+                if (requiredSpeed > _speed)
+                    tHigh = tMid;
+                else
+                    tLow = tMid;
             }
 
-            if (bestTime > 0 && minError < 1f) // Допустимая ошибка 1 юнит
+            // Проверяем, достаточно ли точно
+            if (bestT > 0f && bestError <= _speed * 0.15f) // ±15%
             {
-                float t = bestTime;
-                Vector3 predictedTarget = targetPos + targetVel * t;
-                float predictedHorizontalDist = new Vector3(predictedTarget.x - shootPos.x, 0, predictedTarget.z - shootPos.z).magnitude;
-                
-                float Vx = predictedHorizontalDist / t;
-                float Vy = (predictedTarget.y - shootPos.y - 0.5f * _gravity * t * t) / t;
-                
-                // Направление
-                Vector3 horizontalDir = new Vector3(deltaPos.x, 0, deltaPos.z).normalized;
-                velocity = horizontalDir * Vx + Vector3.up * Vy;
-                
+                impactTime = bestT;
                 return true;
             }
 
-            velocity = Vector3.zero;
             return false;
         }
 
-        // ✅ Fallback: Простая параболическая дуга
-        private Vector3 SimpleArcLaunch(Vector3 shootPos, Vector3 targetPos)
+        private bool CalculateRequiredSpeed(float distXZ, float dy, float t, out float requiredSpeed)
         {
-            Vector3 delta = targetPos - shootPos;
-            float horizontalDist = new Vector3(delta.x, 0, delta.z).magnitude;
-            
-            // Время полёта для красивой дуги
-            float flightTime = horizontalDist / _speed * 1.5f;
-            
-            // Вертикальная скорость
-            float peakHeight = horizontalDist * 0.5f; // Высота дуги = 50% дистанции
-            float Vy = Mathf.Sqrt(2f * Mathf.Abs(_gravity) * peakHeight);
-            
-            // Горизонтальная скорость
-            float Vx = horizontalDist / flightTime;
-            
-            Vector3 horizontalDir = new Vector3(delta.x, 0, delta.z).normalized;
-            return horizontalDir * Vx + Vector3.up * Vy;
+            requiredSpeed = 0f;
+            if (t <= 0f) return false;
+
+            // v0x = distXZ / t
+            // v0y = (dy - 0.5 * g * t^2) / t
+            float v0x = distXZ / t;
+            float v0y = (dy - 0.5f * _gravity * t * t) / t;
+
+            requiredSpeed = Mathf.Sqrt(v0x * v0x + v0y * v0y);
+            return true;
+        }
+
+        private void LaunchWithVelocity(Vector3 shootPos, Vector3 predictedPos, float impactTime)
+        {
+            Vector3 toTarget = predictedPos - shootPos;
+            float distXZ = new Vector2(toTarget.x, toTarget.z).magnitude;
+            float dy = toTarget.y;
+
+            // Рассчитываем точную скорость
+            float v0x = distXZ / impactTime;
+            float v0y = (dy - 0.5f * _gravity * impactTime * impactTime) / impactTime;
+
+            // Масштабируем, чтобы точно соответствовать _speed (если нужно)
+            float currentSpeed = Mathf.Sqrt(v0x * v0x + v0y * v0y);
+            if (currentSpeed > 0.001f)
+            {
+                float scale = _speed / currentSpeed;
+                v0x *= scale;
+                v0y *= scale;
+            }
+
+            Vector3 dirXZ = new Vector3(toTarget.x, 0, toTarget.z).normalized;
+            _velocity = dirXZ * v0x + Vector3.up * v0y;
+
+            transform.rotation = Quaternion.LookRotation(_velocity);
         }
     }
 }

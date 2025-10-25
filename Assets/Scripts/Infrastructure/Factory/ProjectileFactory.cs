@@ -30,7 +30,7 @@ namespace Infrastructure.Factory
             var projectile = _simpleProjectilePool.Get(out var returnToPoolAction);
             
             var config = _assetDatabase.ProjectileConfig(ProjectileType.Simple);
-            projectile.Initialize(config.Speed, config.Damage, config.Lifetime, returnToPoolAction);
+            projectile.Initialize(config, returnToPoolAction);
             projectile.transform.SetPositionAndRotation(position, rotation);
             
             return projectile;
@@ -41,7 +41,7 @@ namespace Infrastructure.Factory
             var projectile = _cannonProjectilePool.Get(out var returnToPoolAction);
             
             var config = _assetDatabase.ProjectileConfig(ProjectileType.Cannon);
-            projectile.Initialize(config.Speed, config.Damage, config.Lifetime, returnToPoolAction);
+            projectile.Initialize(config, returnToPoolAction);
             projectile.transform.SetPositionAndRotation(position, rotation);
             
             return projectile;
@@ -52,7 +52,7 @@ namespace Infrastructure.Factory
             var projectile = _mortarProjectilePool.Get(out var returnToPoolAction);
             
             var config = _assetDatabase.ProjectileConfig(ProjectileType.Mortar);
-            projectile.Initialize(config.Speed, config.Damage, config.Lifetime, returnToPoolAction);
+            projectile.Initialize(config, returnToPoolAction);
             projectile.transform.SetPositionAndRotation(position, rotation);
             
             return projectile;

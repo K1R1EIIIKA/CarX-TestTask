@@ -28,7 +28,7 @@ namespace CanonLogic
             var target = GetNearestTarget();
             if (target != null)
             {
-                Aim(target);
+                    Aim(target);
 
                 if (Time.time - _lastShotTime >= _shootInterval)
                 {
