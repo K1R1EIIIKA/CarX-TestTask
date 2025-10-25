@@ -17,7 +17,7 @@ namespace CanonLogic
         protected IProjectileFactory projectileFactory;
         protected IAssetDatabase assetDatabase;
 
-        public void Initialize(IProjectileFactory factory, IAssetDatabase assetDb)
+        public virtual void Initialize(IProjectileFactory factory, IAssetDatabase assetDb)
         {
             projectileFactory = factory;
             assetDatabase = assetDb;
@@ -25,20 +25,19 @@ namespace CanonLogic
 
         protected virtual void Update()
         {
-            if (Time.time - _lastShotTime < _shootInterval) return;
-
             var target = GetNearestTarget();
             if (target != null)
             {
-                Shoot(target);
-                _lastShotTime = Time.time;
-            }
-            
-            if (target != null)
-            {
                 Aim(target);
+
+                if (Time.time - _lastShotTime >= _shootInterval)
+                {
+                    Shoot(target);
+                    _lastShotTime = Time.time;
+                }
             }
         }
+
 
         private Transform GetNearestTarget()
         {

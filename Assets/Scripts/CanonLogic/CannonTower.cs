@@ -1,77 +1,83 @@
-﻿using MonstersLogic;
+﻿using CanonLogic.ShootStrategy;
+using Infrastructure.Asset;
+using Infrastructure.Factory;
+using MonstersLogic;
 using UnityEngine;
 
-namespace CanonLogic {
-    public class CannonTower : BaseTower {
+namespace CanonLogic
+{
+    public class CannonTower : BaseTower
+    {
         [SerializeField] private Transform _horizontalPivot;
         [SerializeField] private Transform _verticalPivot;
-        [SerializeField] private float _rotationSpeed = 90f;
+        [SerializeField] private float _aimSpeed = 5f;
 
-        protected override void Aim(Transform targetTransform) {
+        // ✅ Стратегии наведения
+        private IAimStrategy _aimStrategy;
+
+        protected override void Aim(Transform targetTransform)
+        {
             var target = targetTransform.GetComponent<Monster>();
             if (target == null) return;
-            Vector3 towerPos = shootPoint.position;
+
+            Vector3 shootPos = shootPoint.position;
             Vector3 targetPos = target.transform.position;
             Vector3 targetVel = target.Velocity;
-            Vector3 toTarget = targetPos - towerPos;
 
-            var projectileSpeed = assetDatabase.ProjectileConfig(projectileType).Speed;
-            var a = Vector3.Dot(targetVel, targetVel) - projectileSpeed * projectileSpeed;
-            var b = 2f * Vector3.Dot(targetVel, toTarget);
-            var c = Vector3.Dot(toTarget, toTarget);
-            const float eps = 0.001f;
-
-            var impactTime = 0f;
-            var validSolution = false;
-            if (Mathf.Abs(a) < eps) {
-                if (Mathf.Abs(b) > eps) {
-                    var t = -c / b;
-                    if (t > 0f) { impactTime = t; validSolution = true; }
-                }
-            } else {
-                var disc = b * b - 4f * a * c;
-                if (disc >= 0f) {
-                    var sqrt = Mathf.Sqrt(disc);
-                    var t1 = (-b + sqrt) / (2f * a);
-                    var t2 = (-b - sqrt) / (2f * a);
-                    var t = (t1 > 0f && t2 > 0f) ? Mathf.Min(t1, t2) : Mathf.Max(t1, t2);
-                    if (t > 0f) { impactTime = t; validSolution = true; }
-                }
-            }
-
-            Vector3 predictedPos = validSolution 
-                ? targetPos + targetVel * impactTime 
-                : targetPos;
-
-            Vector3 dir = predictedPos - towerPos;
-
-            Vector3 flatDir = new Vector3(dir.x, 0f, dir.z);
-            if (flatDir.sqrMagnitude > 1e-6f) {
-                Quaternion desiredYaw = Quaternion.LookRotation(flatDir, Vector3.up);
-                _horizontalPivot.rotation = Quaternion.RotateTowards(
-                    _horizontalPivot.rotation,
-                    desiredYaw,
-                    _rotationSpeed * Time.deltaTime);
-            }
-
-            if (dir.sqrMagnitude > 1e-6f) {
-                Quaternion fullRot = Quaternion.LookRotation(dir);
-                Quaternion desiredPitch = Quaternion.Euler(fullRot.eulerAngles.x, 0f, 0f);
-                _verticalPivot.localRotation = Quaternion.RotateTowards(
-                    _verticalPivot.localRotation,
-                    desiredPitch,
-                    _rotationSpeed * Time.deltaTime);
-            }
+            var config = assetDatabase.ProjectileConfig(projectileType); // Предполагаем такой метод
+            
+            // ✅ Используем стратегию
+            Vector3 aimDirection = _aimStrategy.CalculateAimDirection(shootPos, targetPos, targetVel, config);
+            RotateTurretTowards(aimDirection);
         }
 
-        protected override void Shoot(Transform targetTransform) {
+        protected override void Shoot(Transform targetTransform)
+        {
             var target = targetTransform.GetComponent<Monster>();
             if (target == null) return;
 
-            var projectile = projectileFactory.CreateProjectile(projectileType, shootPoint.position, transform.rotation);
-            if (projectile != null) {
+            var projectile = projectileFactory.CreateProjectile(projectileType, shootPoint.position, shootPoint.rotation);
+            if (projectile != null)
+            {
                 projectile.Launch(target);
             }
         }
+
+        public override void Initialize(IProjectileFactory factory, IAssetDatabase assetDb)
+        {
+            base.Initialize(factory, assetDb);
+            
+            // ✅ Инициализируем стратегию по типу снаряда
+            _aimStrategy = projectileType switch
+            {
+                ProjectileType.Cannon => new LinearAimStrategy(),
+                ProjectileType.Mortar => new ParabolicAimStrategy(),
+                _ => new LinearAimStrategy(),
+            };
+        }
+
+        private void RotateTurretTowards(Vector3 direction)
+        {
+            if (direction == Vector3.zero) return;
+
+            // Горизонтальный поворот (Y)
+            if (_horizontalPivot != null)
+            {
+                Quaternion horizontalRot = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+                _horizontalPivot.rotation = Quaternion.Slerp(_horizontalPivot.rotation, horizontalRot, Time.deltaTime * _aimSpeed);
+            }
+
+            // Вертикальный поворот (X)
+            if (_verticalPivot != null && _horizontalPivot != null)
+            {
+                Vector3 localDirection = Quaternion.Inverse(_horizontalPivot.rotation) * direction;
+                float desiredAngle = Mathf.Atan2(localDirection.y, localDirection.z) * Mathf.Rad2Deg;
+                desiredAngle = Mathf.Clamp(desiredAngle, -80f, 80f);
+
+                Quaternion verticalRot = Quaternion.Euler(desiredAngle, 0, 0);
+                _verticalPivot.localRotation = Quaternion.Slerp(_verticalPivot.localRotation, verticalRot, Time.deltaTime * _aimSpeed);
+            }
+        }
     }
+
 }
