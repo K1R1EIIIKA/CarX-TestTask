@@ -21,7 +21,7 @@ namespace ProjectileLogic
             var targetVel = target.Velocity;
             var toTarget = targetPos - towerPos;
 
-            var a = Vector3.Dot(targetVel, targetVel) - _speed * _speed;
+            var a = Vector3.Dot(targetVel, targetVel) - speed * speed;
             var b = 2f * Vector3.Dot(targetVel, toTarget);
             var c = Vector3.Dot(toTarget, toTarget);
             const float eps = 0.001f;
@@ -55,7 +55,7 @@ namespace ProjectileLogic
             {
                 var direction = (dir.sqrMagnitude < 1e-6f) ? toTarget.normalized : dir.normalized;
                 transform.rotation = Quaternion.LookRotation(direction);
-                _velocity = direction * _speed;
+                _velocity = direction * speed;
             }
 
             if (!TryFindImpactTime(out float impactTime))

@@ -22,7 +22,7 @@ namespace ProjectileLogic
             }
 
             var direction = _target.transform.position - transform.position;
-            var distanceThisFrame = _speed * Time.deltaTime;
+            var distanceThisFrame = speed * Time.deltaTime;
 
             if (direction.sqrMagnitude <= distanceThisFrame * distanceThisFrame)
             {

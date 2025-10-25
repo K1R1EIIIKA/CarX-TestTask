@@ -8,14 +8,14 @@ namespace ProjectileLogic
 {
     public abstract class BaseProjectile : MonoBehaviour
     {
-        protected float _speed = 0.2f;
         private int _damage = 10;
         private float _lifetime = 5f;
         private Action _returnToPoolAction;
+        protected float speed = 0.2f;
 
         public virtual void Initialize(ProjectileConfig config, Action returnToPoolAction)
         {
-            _speed = config.Speed;
+            speed = config.Speed;
             _damage = config.Damage;
             _lifetime = config.Lifetime;
             _returnToPoolAction = returnToPoolAction;
