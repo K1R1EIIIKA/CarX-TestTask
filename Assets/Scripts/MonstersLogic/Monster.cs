@@ -29,7 +29,7 @@ namespace MonstersLogic
                     return Vector3.zero;
 
                 var direction = (_moveTarget.position - transform.position).normalized;
-                return direction * _speed / Time.deltaTime;
+                return direction * _speed;
             }
         }
 
@@ -50,7 +50,7 @@ namespace MonstersLogic
             }
 
             var direction = (_moveTarget.position - transform.position).normalized;
-            var translation = direction * _speed;
+            var translation = direction * _speed * Time.deltaTime;
             transform.Translate(translation);
         }
 

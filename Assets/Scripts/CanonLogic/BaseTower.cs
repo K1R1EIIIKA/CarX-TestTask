@@ -34,25 +34,22 @@ namespace CanonLogic
 
         private Transform GetNearestTarget()
         {
-            var hits = Physics.OverlapSphere(transform.position, _range);
-            Transform nearestTarget = null;
-            var nearestDistanceSqr = Mathf.Infinity;
-
-            foreach (var hit in hits)
+            Monster[] monsters = FindObjectsOfType<Monster>();
+            Transform nearest = null;
+            float nearestDist = float.MaxValue;
+            foreach (Monster monster in monsters)
             {
-                var distanceSqr = (hit.transform.position - transform.position).sqrMagnitude;
-            
-                if (!hit.TryGetComponent(out IDamageable _))
+                if (monster == null)
                     continue;
-            
-                if (distanceSqr < nearestDistanceSqr)
+
+                float dist = Vector3.Distance(transform.position, monster.transform.position);
+                if (dist <= _range && dist < nearestDist)
                 {
-                    nearestDistanceSqr = distanceSqr;
-                    nearestTarget = hit.transform;
+                    nearest = monster.transform;
+                    nearestDist = dist;
                 }
             }
-
-            return nearestTarget;
+            return nearest;
         }
 
         protected abstract void Shoot(Transform target);
