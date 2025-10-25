@@ -1,4 +1,5 @@
-﻿using Infrastructure.Configs;
+﻿using CanonLogic;
+using Infrastructure.Configs;
 using Infrastructure.DIContainer;
 using MonstersLogic;
 using ProjectileLogic;
@@ -9,8 +10,6 @@ namespace Infrastructure.Asset
     public interface IAssetDatabase : IService
     {
         MonsterConfig MonsterConfig { get; }
-        SimpleProjectileConfig SimpleProjectileConfig { get; }
-        CannonProjectileConfig CannonProjectileConfig { get; }
-        MortarProjectileConfig MortarProjectileConfig { get; }
+        ProjectileConfig ProjectileConfig(ProjectileType type);
     }
 }

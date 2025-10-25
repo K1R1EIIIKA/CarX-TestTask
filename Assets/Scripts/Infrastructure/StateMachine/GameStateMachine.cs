@@ -18,7 +18,7 @@ namespace Infrastructure.StateMachine
             _states = new Dictionary<Type, IGameState>()
                 {
                     { typeof(BootstrapState), new BootstrapState(this, container, moveGoal) },
-                    { typeof(GameLoopState), new GameLoopState(spawners, container.Single<IProjectileFactory>(), container.Single<IMonsterFactory>()) },
+                    { typeof(GameLoopState), new GameLoopState(spawners, container.Single<IProjectileFactory>(), container.Single<IMonsterFactory>(), container.Single<IAssetDatabase>()) },
                 };
         }
 

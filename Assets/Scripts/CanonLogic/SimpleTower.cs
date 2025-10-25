@@ -5,6 +5,10 @@ namespace CanonLogic
 {
     public class SimpleTower : BaseTower
     {
+        protected override void Aim(Transform target)
+        {
+            
+        }
         protected override void Shoot(Transform targetTransform)
         {
             var target = targetTransform.GetComponent<Monster>();

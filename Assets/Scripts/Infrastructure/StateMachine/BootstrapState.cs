@@ -1,4 +1,5 @@
-﻿using Infrastructure.Asset;
+﻿using CanonLogic;
+using Infrastructure.Asset;
 using Infrastructure.DIContainer;
 using Infrastructure.Factory;
 using Infrastructure.ObjectPooling;
@@ -27,9 +28,9 @@ namespace Infrastructure.StateMachine
             _allServices.RegisterSingle<IAssetDatabase>(new AssetDatabase());
             var assetDatabase = _allServices.Single<IAssetDatabase>();
 
-            _allServices.RegisterSingle(new SimpleProjectilePool(assetDatabase.SimpleProjectileConfig.ProjectilePrefab, 10));
-            _allServices.RegisterSingle(new CannonProjectilePool(assetDatabase.CannonProjectileConfig.ProjectilePrefab, 10));
-            _allServices.RegisterSingle(new MortarProjectilePool(assetDatabase.MortarProjectileConfig.ProjectilePrefab, 10));
+            _allServices.RegisterSingle(new SimpleProjectilePool(assetDatabase.ProjectileConfig(ProjectileType.Simple).ProjectilePrefab, 10));
+            _allServices.RegisterSingle(new CannonProjectilePool(assetDatabase.ProjectileConfig(ProjectileType.Cannon).ProjectilePrefab, 10));
+            _allServices.RegisterSingle(new MortarProjectilePool(assetDatabase.ProjectileConfig(ProjectileType.Mortar).ProjectilePrefab, 10));
 
             _allServices.RegisterSingle<IMonsterFactory>(new SimpleMonsterFactory(assetDatabase.MonsterConfig, _moveGoal));
             _allServices.RegisterSingle<IProjectileFactory>(new ProjectileFactory(

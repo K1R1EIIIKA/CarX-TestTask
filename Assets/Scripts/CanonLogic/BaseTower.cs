@@ -1,4 +1,5 @@
-﻿using Infrastructure.Factory;
+﻿using Infrastructure.Asset;
+using Infrastructure.Factory;
 using MonstersLogic;
 using UnityEngine;
 
@@ -14,10 +15,12 @@ namespace CanonLogic
         private float _lastShotTime = Mathf.NegativeInfinity;
 
         protected IProjectileFactory projectileFactory;
+        protected IAssetDatabase assetDatabase;
 
-        public void Initialize(IProjectileFactory factory)
+        public void Initialize(IProjectileFactory factory, IAssetDatabase assetDb)
         {
             projectileFactory = factory;
+            assetDatabase = assetDb;
         }
 
         protected virtual void Update()
@@ -29,6 +32,11 @@ namespace CanonLogic
             {
                 Shoot(target);
                 _lastShotTime = Time.time;
+            }
+            
+            if (target != null)
+            {
+                Aim(target);
             }
         }
 
@@ -52,6 +60,7 @@ namespace CanonLogic
             return nearest;
         }
 
+        protected abstract void Aim(Transform target);
         protected abstract void Shoot(Transform target);
     }
 }
